@@ -21,6 +21,7 @@ interface DataPoint {
 
 export default function CommodityFxDashboard() {
   const [data, setData] = useState<DataPoint[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     Papa.parse("data/palm_oil_vs_idr_monthly.csv", {
@@ -40,13 +41,42 @@ export default function CommodityFxDashboard() {
     });
   }, []);
 
+  const sendEmail = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "sopian@ptbia.co.id",
+        //   to: "nuhansen.123@gmail.com",
+          subject: "Commodity & Exchange Rate Data",
+          data: data, // kirim semua data chart
+        }),
+      });
+
+      const result = await res.json();
+      alert(result.message);
+    } catch (err) {
+      alert("Gagal mengirim email");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       {/* Judul Dashboard */}
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">
-        📊 Commodity vs FX Dashboard
-      </h1>
-
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">📈 Commodity & Exchange Rate</h2>
+        <button
+          onClick={sendEmail}
+          disabled={loading}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50"
+        >
+          {loading ? "Mengirim..." : "📧 Kirim Data"}
+        </button>
+      </div>
       {/* Container Chart */}
       <div className="w-full h-[500px] bg-white shadow-lg rounded-2xl p-6">
         <ResponsiveContainer width="100%" height="100%">
@@ -92,6 +122,7 @@ export default function CommodityFxDashboard() {
             />
           </LineChart>
         </ResponsiveContainer>
+        <br /> <br />
       </div>
     </div>
   );
