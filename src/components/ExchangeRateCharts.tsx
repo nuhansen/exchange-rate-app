@@ -17,6 +17,31 @@ type LatestRate = {
   rate: number;
 };
 
+const fetchLatestRate = async (): Promise<LatestRate> => {
+    const res = await fetch(
+        "https://v6.exchangerate-api.com/v6/efa9dc3e9567c2de54b155a0/pair/USD/IDR"
+    );
+    const data = await res.json();
+    return {
+        base: data.base_code,
+        target: data.target_code,
+        date: data.time_last_update_utc,
+        rate: data.conversion_rate,
+    };
+};
+
+const fetchLatestRateIDRToUSD = async (): Promise<LatestRate> => {
+    const res = await fetch(
+        "https://v6.exchangerate-api.com/v6/efa9dc3e9567c2de54b155a0/pair/IDR/USD"
+    );
+    const data = await res.json();
+    return {
+        base: data.base_code,
+        target: data.target_code,
+        date: data.time_last_update_utc,
+        rate: data.conversion_rate,
+    };
+};
 // Component
 const ExchangeRateCharts: React.FC = () => {
   const [latest, setLatest] = useState<LatestRate | null>(null);
@@ -26,7 +51,7 @@ const ExchangeRateCharts: React.FC = () => {
   // Load local JSON (dummy data)
   useEffect(() => {
     const loadData = async () => {
-      const latestData: LatestRate = await fetch("/data/latest.json").then(res => res.json());
+      const latestData: LatestRate = await fetchLatestRateIDRToUSD()
       const threeMonthsData = await fetch("/data/3months.json").then(res => res.json());
       const threeYearsData = await fetch("/data/3years.json").then(res => res.json());
 
